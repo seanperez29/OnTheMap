@@ -10,26 +10,26 @@ import Foundation
 
 class ParseClient: NSObject {
     
-    var session = NSURLSession.sharedSession()
+    var session = URLSession.shared
 
-    func taskForPostMethod(methodParameters: [String:AnyObject], completionHandler: (success: Bool, error: NSError?) -> Void) -> NSURLSessionDataTask {
+    func taskForPostMethod(_ methodParameters: [String:AnyObject], completionHandler: @escaping (_ success: Bool, _ error: NSError?) -> Void) -> Void {
         
-        let request = NSMutableURLRequest(URL: NSURL(string: ParseClient.Constants.BaseURL)!)
-        request.HTTPMethod = "POST"
+        let request = NSMutableURLRequest(url: URL(string: ParseClient.Constants.BaseURL)!)
+        request.httpMethod = "POST"
         request.addValue(ParseClient.Constants.ParseApplicationID, forHTTPHeaderField: "X-Parse-Application-Id")
         request.addValue(ParseClient.Constants.ParseRestApiKey, forHTTPHeaderField: "X-Parse-REST-API-Key")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         do {
-            request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(methodParameters, options: .PrettyPrinted)
+            request.httpBody = try JSONSerialization.data(withJSONObject: methodParameters, options: .prettyPrinted)
         } catch {
-            completionHandler(success: false, error: NSError(domain: "taskForPostMethod", code: 0, userInfo: [NSLocalizedDescriptionKey: "Error with student post"]))
+            completionHandler(false, NSError(domain: "taskForPostMethod", code: 0, userInfo: [NSLocalizedDescriptionKey: "Error with student post"]))
         }
         
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            func sendError(error: String) {
+        let task = session.dataTask(with: request as URLRequest) { (data, response, error) in
+            func sendError(_ error: String) {
                 print(error)
                 let userInfo = [NSLocalizedDescriptionKey : error]
-                completionHandler(success: false, error: NSError(domain: "taskForPostMethod", code: 0, userInfo: userInfo))
+                completionHandler(false, NSError(domain: "taskForPostMethod", code: 0, userInfo: userInfo))
             }
             
             guard (error == nil) else {
@@ -37,7 +37,7 @@ class ParseClient: NSObject {
                 return
             }
             
-            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+            guard let statusCode = (response as? HTTPURLResponse)?.statusCode , statusCode >= 200 && statusCode <= 299 else {
                 sendError("Your request returned a status code other than 2xx!")
                 return
             }
@@ -46,25 +46,24 @@ class ParseClient: NSObject {
                 sendError("No data was returned by the request!")
                 return
             }
-            completionHandler(success: true, error: nil)
-            print(NSString(data: data, encoding: NSUTF8StringEncoding))
+            completionHandler(true, nil)
+            print(NSString(data: data, encoding: String.Encoding.utf8.rawValue))
         }
         task.resume()
-        return task
     }
     
-    func parseURLFromParameters(parameters: [String:AnyObject], withPathExtension: String? = nil) -> NSURL {
-        let components = NSURLComponents()
+    func parseURLFromParameters(_ parameters: [String:AnyObject], withPathExtension: String? = nil) -> URL {
+        var components = URLComponents()
         components.scheme = ParseClient.Constants.ApiScheme
         components.host = ParseClient.Constants.ApiHost
         components.path = ParseClient.Constants.ApiPath + (withPathExtension ?? "")
-        components.queryItems = [NSURLQueryItem]()
+        components.queryItems = [URLQueryItem]()
         
         for (key, value) in parameters {
-            let queryItem = NSURLQueryItem(name: key, value: "\(value)")
+            let queryItem = URLQueryItem(name: key, value: "\(value)")
             components.queryItems!.append(queryItem)
         }
-        return components.URL!
+        return components.url!
     }
     
     class func sharedInstance() -> ParseClient {

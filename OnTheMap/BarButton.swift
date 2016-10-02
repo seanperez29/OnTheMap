@@ -11,13 +11,13 @@ import UIKit
 class BarButton: UITabBarController {
     
     
-    @IBAction func userPostPressed(sender: AnyObject) {
-        let controller = storyboard?.instantiateViewControllerWithIdentifier("UserPostViewController") as! UserPostViewController
-        presentViewController(controller, animated: true, completion: nil)
+    @IBAction func userPostPressed(_ sender: AnyObject) {
+        let controller = storyboard?.instantiateViewController(withIdentifier: "UserPostViewController") as! UserPostViewController
+        present(controller, animated: true, completion: nil)
     }
     
-    @IBAction func logoutPressed(sender: AnyObject) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func logoutPressed(_ sender: AnyObject) {
+        self.dismiss(animated: true, completion: nil)
         UdacityClient.sharedInstance().taskForLogout { (success, error) in
             if error != nil {
                 print(error)
@@ -25,7 +25,7 @@ class BarButton: UITabBarController {
         }
     }
     
-    @IBAction func reload(sender: AnyObject) {
-        NSNotificationCenter.defaultCenter().postNotificationName("reloadData", object: nil)
+    @IBAction func reload(_ sender: AnyObject) {
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "reloadData"), object: nil)
     }
 }

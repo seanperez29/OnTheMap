@@ -21,19 +21,19 @@ class LoginViewController: UIViewController {
         configureBackground()
     }
     
-    override func viewDidDisappear(animated: Bool) {
+    override func viewDidDisappear(_ animated: Bool) {
         emailTextField.text = ""
         passwordTextField.text = ""
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        activityIndicator.hidden = true
+        activityIndicator.isHidden = true
     }
     
     @IBAction func udacityLoginPressed() {
         setUIEnabled(false)
-        guard let email = emailTextField.text where email != "", let password = passwordTextField.text where password != "" else {
+        guard let email = emailTextField.text , email != "", let password = passwordTextField.text , password != "" else {
             UdacityClient.sharedInstance().displayErrorAlert(self, title: "Please enter username and password")
             setUIEnabled(true)
             return
@@ -52,25 +52,25 @@ class LoginViewController: UIViewController {
         }
     }
     
-    private func completeLogin() {
-        let controller = storyboard!.instantiateViewControllerWithIdentifier("rootNavigationController") as! UINavigationController
-        presentViewController(controller, animated: true, completion: nil)
+    fileprivate func completeLogin() {
+        let controller = storyboard!.instantiateViewController(withIdentifier: "rootNavigationController") as! UINavigationController
+        present(controller, animated: true, completion: nil)
     }
     
-    @IBAction func udacitySignUp(sender: AnyObject) {
-        if UIApplication.sharedApplication().canOpenURL(NSURL(string: UdacityClient.Constants.UdacitySignupURL)!) {
-            UIApplication.sharedApplication().openURL(NSURL(string: UdacityClient.Constants.UdacitySignupURL)!)
+    @IBAction func udacitySignUp(_ sender: AnyObject) {
+        if UIApplication.shared.canOpenURL(URL(string: UdacityClient.Constants.UdacitySignupURL)!) {
+            UIApplication.shared.openURL(URL(string: UdacityClient.Constants.UdacitySignupURL)!)
         }
     }
 }
 
 extension LoginViewController {
     
-    private func setUIEnabled(enabled: Bool) {
-        udacityLoginButton.enabled = enabled
-        emailTextField.enabled = enabled
-        passwordTextField.enabled = enabled
-        activityIndicator.hidden = enabled
+    fileprivate func setUIEnabled(_ enabled: Bool) {
+        udacityLoginButton.isEnabled = enabled
+        emailTextField.isEnabled = enabled
+        passwordTextField.isEnabled = enabled
+        activityIndicator.isHidden = enabled
         
         if enabled {
             activityIndicator.stopAnimating()
@@ -81,16 +81,16 @@ extension LoginViewController {
         }
     }
     
-    private func configureBackground() {
+    fileprivate func configureBackground() {
         let gradientLayer = CAGradientLayer()
-        view.backgroundColor = UIColor.orangeColor()
+        view.backgroundColor = UIColor.orange
         gradientLayer.frame = self.view.bounds
-        let color1 = UIColor.orangeColor().CGColor as CGColorRef
-        let color2 = UIColor(red: 255.0/255.0, green: 195.0/255.0, blue: 61.0/255.0, alpha: 1.0).CGColor as CGColorRef
+        let color1 = UIColor.orange.cgColor as CGColor
+        let color2 = UIColor(red: 255.0/255.0, green: 195.0/255.0, blue: 61.0/255.0, alpha: 1.0).cgColor as CGColor
         gradientLayer.colors = [color2, color1]
         gradientLayer.locations = [0.0, 0.5]
         gradientLayer.frame = self.view.frame
-        view.layer.insertSublayer(gradientLayer, atIndex: 0)
+        view.layer.insertSublayer(gradientLayer, at: 0)
     }
 }
 

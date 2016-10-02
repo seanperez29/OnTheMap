@@ -31,9 +31,9 @@ class UserPostViewController: UIViewController {
         setUITextFieldForInitialView()
     }
     
-    @IBAction func findOnMapPressed(sender: AnyObject) {
+    @IBAction func findOnMapPressed(_ sender: AnyObject) {
          self.setActivityIndicatorView(true)
-        if let locationText = locationTextField.text where locationText != "" {
+        if let locationText = locationTextField.text , locationText != "" {
             forwardGeocoding(locationText)
              self.setActivityIndicatorView(false)
         } else {
@@ -43,7 +43,7 @@ class UserPostViewController: UIViewController {
         }
     }
     
-    func forwardGeocoding(address: String) {
+    func forwardGeocoding(_ address: String) {
         CLGeocoder().geocodeAddressString(address, completionHandler: { (placemarks, error) in
             if let placemark = placemarks?[0] {
                 self.mapView.addAnnotation(MKPlacemark(placemark: placemark))
@@ -57,7 +57,7 @@ class UserPostViewController: UIViewController {
         })
     }
     
-    func setMapViewRegionAndScale(location: CLLocationCoordinate2D) {
+    func setMapViewRegionAndScale(_ location: CLLocationCoordinate2D) {
         let span = MKCoordinateSpanMake(0.01, 0.01)
         let region = MKCoordinateRegion(center: location, span: span)
         mapView.setRegion(region, animated: true)
@@ -65,9 +65,9 @@ class UserPostViewController: UIViewController {
         self.longitude = location.longitude
     }
     
-    @IBAction func submitPostPressed(sender: AnyObject) {
+    @IBAction func submitPostPressed(_ sender: AnyObject) {
         
-        guard let mediaURL = linkTextField.text where mediaURL != "" else {
+        guard let mediaURL = linkTextField.text , mediaURL != "" else {
             UdacityClient.sharedInstance().displayErrorAlert(self, title: "Please enter a link to share")
             return
         }
@@ -79,45 +79,45 @@ class UserPostViewController: UIViewController {
         
         ParseClient.sharedInstance().postStudentLocation(uniqueID, firstName: firstName, lastName: lastName, mapString: mapString, mediaURL: mediaURL, latitude: latitude, longitude: longitude, completionHandler: { (success, errorString) in
                 if success {
-                    self.dismissViewControllerAnimated(true, completion: nil)
+                    self.dismiss(animated: true, completion: nil)
                 } else {
                     UdacityClient.sharedInstance().displayErrorAlert(self, title: "There was an error submitting your post. Please try again")
                 }
             })
     }
 
-    @IBAction func cancelPost(sender: AnyObject) {
-        dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func cancelPost(_ sender: AnyObject) {
+        dismiss(animated: true, completion: nil)
     }
 }
 
 extension UserPostViewController {
     
-    func setActivityIndicatorView(enabled: Bool) {
+    func setActivityIndicatorView(_ enabled: Bool) {
         if enabled {
-            self.activityIndicator.hidden = !enabled
+            self.activityIndicator.isHidden = !enabled
             self.activityIndicator.startAnimating()
         } else {
-            self.activityIndicator.hidden = !enabled
+            self.activityIndicator.isHidden = !enabled
             self.activityIndicator.stopAnimating()
         }
     }
     
     func setUITextFieldForInitialView() {
-        let attributedString = [NSForegroundColorAttributeName: UIColor.whiteColor()]
+        let attributedString = [NSForegroundColorAttributeName: UIColor.white]
         locationTextField.attributedPlaceholder = NSAttributedString(string: "Enter Your Location Here", attributes: attributedString)
     }
     
     func setUIElementsForMapViewing() {
-        let attributedString = [NSForegroundColorAttributeName: UIColor.whiteColor()]
-        findOnMapButton.hidden = true
-        submitPostButton.hidden = false
-        bottomTabBar.backgroundColor = UIColor.clearColor()
+        let attributedString = [NSForegroundColorAttributeName: UIColor.white]
+        findOnMapButton.isHidden = true
+        submitPostButton.isHidden = false
+        bottomTabBar.backgroundColor = UIColor.clear
         topTabBar.backgroundColor = UIColor(red: 65.0/255.0, green: 124.0/255.0, blue: 193.0/255.0, alpha: 0.85)
-        linkTextField.hidden = false
+        linkTextField.isHidden = false
         linkTextField.attributedPlaceholder = NSAttributedString(string: "Enter a Link to Share Here", attributes: attributedString)
-        stackViewLabel.hidden = true
-        cancelPostButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
-        mapView.hidden = false
+        stackViewLabel.isHidden = true
+        cancelPostButton.setTitleColor(UIColor.white, for: UIControlState())
+        mapView.isHidden = false
     }
 }

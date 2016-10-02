@@ -21,10 +21,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(MapViewController.reloadData), name: "reloadData", object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(MapViewController.reloadData), name: NSNotification.Name(rawValue: "reloadData"), object: nil)
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.mapView.delegate = self
         ParseClient.sharedInstance().getStudentLocations { (students, success, errorString) in
@@ -36,19 +36,19 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    func getStudents(students: [StudentInformation]) {
+    func getStudents(_ students: [StudentInformation]) {
         for student in students {
-            let lat = student.latitude
-            let long = student.longitude
-            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
-            let first = student.firstName
-            let last = student.lastName
-            let mediaURL = student.mediaURL
-            let annotation = MKPointAnnotation()
-            annotation.coordinate = coordinate
-            annotation.title = "\(first) \(last)"
-            annotation.subtitle = mediaURL
-            annotations.append(annotation)
+            if let lat = student.latitude, let long = student.longitude {
+                let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+                let first = student.firstName
+                let last = student.lastName
+                let mediaURL = student.mediaURL
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = coordinate
+                annotation.title = "\(first) \(last)"
+                annotation.subtitle = mediaURL
+                annotations.append(annotation)
+            }
         }
         performUIUpdatesOnMain {
             self.mapView.addAnnotations(self.annotations)
@@ -68,21 +68,21 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 })
             }
         }
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
     }
     
 }
 
 extension MapViewController {
 
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+    @objc(mapView:viewForAnnotation:) func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         let reuseId = "pin"
-        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
+        var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView!.canShowCallout = true
-            pinView!.pinTintColor = UIColor.redColor()
-            pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
+            pinView!.pinTintColor = UIColor.red
+            pinView!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
         }
         else {
             pinView!.annotation = annotation
@@ -90,20 +90,20 @@ extension MapViewController {
         return pinView
     }
     
-    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         if control == view.rightCalloutAccessoryView {
-            let app = UIApplication.sharedApplication()
+            let app = UIApplication.shared
             if let toOpen = view.annotation?.subtitle! {
-                app.openURL(NSURL(string: toOpen)!)
+                app.openURL(URL(string: toOpen)!)
             }
         }
     }
     
     func loadWaiting() {
-        loadingView.hidden = false
-        activityIndicator.hidden = false
+        loadingView.isHidden = false
+        activityIndicator.isHidden = false
         activityIndicator.startAnimating()
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
     }
     
 }

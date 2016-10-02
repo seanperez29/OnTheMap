@@ -15,10 +15,10 @@ class TableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(TableViewController.reloadData), name: "reloadData", object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(TableViewController.reloadData), name: NSNotification.Name(rawValue: "reloadData"), object: nil)
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         ParseClient.sharedInstance().getStudentLocations { (students, success, errorString) in
             if let students = students {
@@ -36,14 +36,14 @@ class TableViewController: UITableViewController {
 
 extension TableViewController {
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return locations.count
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let student = locations[indexPath.row]
-        let cell = tableView.dequeueReusableCellWithIdentifier("studentEntry")!
+        let student = locations[(indexPath as NSIndexPath).row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: "studentEntry")!
         cell.textLabel?.text = student.firstName + " " + student.lastName
         cell.detailTextLabel?.text = student.mediaURL
         cell.imageView!.image = UIImage(named: "pin")
@@ -51,16 +51,21 @@ extension TableViewController {
         return cell
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let student = locations[indexPath.row]
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let student = locations[(indexPath as NSIndexPath).row]
         
-        guard let url = NSURL(string: student.mediaURL) else {
+        guard let mediaURL = student.mediaURL else {
+            print("No media exists")
+            return
+        }
+        
+        guard let url = URL(string: mediaURL) else {
             UdacityClient.sharedInstance().displayErrorAlert(self, title: "Could not obtain URL")
             return
         }
         
-        if UIApplication.sharedApplication().canOpenURL(url) {
-            UIApplication.sharedApplication().openURL(url)
+        if UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.openURL(url)
         }
     }
     
@@ -73,6 +78,6 @@ extension TableViewController {
                 })
             }
         }
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
     }
 }
