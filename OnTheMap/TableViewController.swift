@@ -44,7 +44,9 @@ extension TableViewController {
         
         let student = locations[(indexPath as NSIndexPath).row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "studentEntry")!
-        cell.textLabel?.text = student.firstName + " " + student.lastName
+        if let firstName = student.firstName, let lastName = student.lastName {
+            cell.textLabel?.text = firstName + " " + lastName
+        }
         cell.detailTextLabel?.text = student.mediaURL
         cell.imageView!.image = UIImage(named: "pin")
         
